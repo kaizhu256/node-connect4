@@ -5,6 +5,7 @@ this package will run a standalone web-based connect4 game
 # live demo
 - [https://kaizhu256.github.io/node-connect4/index.html](https://kaizhu256.github.io/node-connect4/index.html)
 
+[![github.com test-server](https://kaizhu256.github.io/node-connect4/screen-capture.png)](https://kaizhu256.github.io/node-connect4/index.html)
 
 # setup instructions
 ```javascript
