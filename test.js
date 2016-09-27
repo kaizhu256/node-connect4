@@ -326,6 +326,8 @@
         local.assetsScript = local.fs.readFileSync(__filename, 'utf8');
         // init server
         local.server = local.http.createServer(function (request, response) {
+            // debug
+            console.log('handling request ' + request.url);
             // serve assets-script
             if (request.url.lastIndexOf('assets.index.js') >= 0) {
                 response.end(local.assetsScript);
@@ -378,13 +380,20 @@
             /* jslint-ignore-end */
         });
         local.server.on('error', function (error) {
-            if (error.code === 'EADDRINUSE') {
-                local.server.listen(8082);
+            if (error.code === 'EADDRINUSE' && !local.EADDRINUSE) {
+                local.EADDRINUSE = error;
+                local.PORT = Number(local.PORT) + 1;
+                local.server.listen(local.PORT, function () {
+                    console.log('server listening on port ' + local.PORT);
+                });
                 return;
             }
             throw error;
         });
-        local.server.listen(process.env.PORT || 8081);
+        local.PORT = process.env.PORT || 8081;
+        local.server.listen(local.PORT, function () {
+            console.log('server listening on port ' + local.PORT);
+        });
         break;
     }
 
