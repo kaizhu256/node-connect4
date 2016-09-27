@@ -1,3 +1,19 @@
+/*
+ * test.js
+ *
+ * this file contains the standalone connect-4 game
+ *
+ * setup instructions
+ * 1. save this file as test.js
+ * 2. install nodejs
+ * 3. run the shell command
+ *    $ PORT=8081 node test.js
+ * 4. open browser to url http://localhost:8081
+ * 5. play the connect4 game!
+ */
+
+
+
 /*jslint
     bitwise: true,
     browser: true,
@@ -329,7 +345,7 @@
             // debug
             console.log('handling request ' + request.url);
             // serve assets-script
-            if (request.url.lastIndexOf('assets.index.js') >= 0) {
+            if (request.url.lastIndexOf('test.js') >= 0) {
                 response.end(local.assetsScript);
                 return;
             }
@@ -367,14 +383,15 @@
 </style>\n\
 </head>\n\
 <body>\n\
-<h1>connect 4 game</h1>\n\
+<h1>connect-4 game</h1>\n\
+<h4><a download href="test.js">download standalone app</a></h4>\n\
 <button class="onclick" id="resetButton1">reset game</button><br>\n\
 <br>\n\
 <h2 id="gameStatus1"></h2>\n\
 <div id="gameContainer1">\n\
     <div class="onclick" id="gameBoard1"></div>\n\
 </div>\n\
-<script src="assets.index.js"></script>\n\
+<script src="test.js"></script>\n\
 </body>\n\
             ');
             /* jslint-ignore-end */
