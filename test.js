@@ -383,7 +383,7 @@
 </style>\n\
 </head>\n\
 <body>\n\
-<h1>connect-4 game</h1>\n\
+<h1><a href="https://github.com/kaizhu256/node-connect4">connect-4 game</a></h1>\n\
 <h4><a download href="test.js">download standalone app</a></h4>\n\
 <button class="onclick" id="resetButton1">reset game</button><br>\n\
 <br>\n\
