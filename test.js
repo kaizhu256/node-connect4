@@ -167,11 +167,11 @@
             // e.g.
             // [
             // -> rows
-            // [1, 0, 0, 0, 0, 0], // |
+            // [1, 2, 0, 0, 0, 0], // |
             // [2, 1, 0, 0, 0, 0], // v
             // [2, 1, 1, 0, 0, 0], //
             // [2, 2, 1, 1, 0, 0], // c
-            // [2, 0, 0, 0, 0, 0], // o
+            // [0, 0, 0, 0, 0, 0], // o
             // [0, 0, 0, 0, 0, 0], // l
             // [0, 0, 0, 0, 0, 0]  // s
             // ]
@@ -196,8 +196,8 @@
             // [2, 2, 1, 1, 0, 0], // |
             // [2, 1, 1, 0, 0, 0], // v
             // [2, 1, 0, 0, 0, 0], //
-            // [1, 0, 0, 0, 0, 0], // c
-            // [2, 0, 0, 0, 0, 0], // o
+            // [1, 2, 0, 0, 0, 0], // c
+            // [0, 0, 0, 0, 0, 0], // o
             // [0, 0, 0, 0, 0, 0], // l
             // [0, 0, 0, 0, 0, 0]  // s
             // ]
@@ -227,10 +227,6 @@
                 ? 2
                 : 1;
         };
-
-        // test
-        local.gameState = local.gameStateCreate();
-        local.playerMove(local.gameState, 'random');
     }());
     switch (local.modeJs) {
 
@@ -239,11 +235,32 @@
     // run browser js-env code - post-init
     case 'browser':
         local.domGameBoard = document.querySelector('#gameBoard1');
-        local.gameBoardDraw = function (state) {
+        local.gameDraw = function (state) {
         /*
          * this function will draw the current state of the game
          */
-            var board;
+            var board, tmp;
+            tmp = '';
+            // game ended with a draw
+            if (state.ended === 0) {
+                tmp += 'game is a draw!';
+                tmp += '<div class="playerDisc"></div>';
+            } else {
+                // game ended with a win
+                if (state.ended) {
+                    tmp += 'player ' + state.playerCurrent + ' has won!';
+                // game is ongoing
+                } else {
+                    tmp += 'player ' + state.playerCurrent + '\'s turn';
+                    if (state.error && state.error.message === 'invalid move') {
+                        tmp += ' <span style="color: #f00;">(invalid move, retry!)</span>';
+                    }
+                }
+                tmp += '<div class="playerDisc playerDisc' + state.playerCurrent + '"></div>';
+            }
+            document.querySelector('#gameStatus1').innerHTML = tmp;
+            // remove error
+            state.error = null;
             // transpose board
             board = state.board[0].map(function (_, ii) {
                 // jslint-hack
@@ -252,21 +269,46 @@
                     return colList[ii];
                 });
             }).reverse();
-            console.log(board);
             board = '<table>\n' +
-                '<thead>' + board[0].map(function () {
-                    return '<th><button></button></th>';
+                '<thead>' + board[0].map(function (_, ii) {
+                    // jslint-hack
+                    local.nop(_);
+                    return '<th><button data-position-col="' + ii + '">&#x25BC;</button></th>';
                 }).join('') + '</thead>\n' +
                 '<tbody>' + board.map(function (rowList) {
                     return '<tr>' + rowList.map(function (playerDisc) {
-                        return '<td><div class="playerDisc playerDisc' + playerDisc +
-                            '"></div></td>';
+                        return '<td><div class="playerDisc playerDisc' +
+                            playerDisc + '"></div></td>';
                     }).join('') + '</tr>';
                 }).join('\n') + '</tbody></table>';
-            console.log(board);
             local.domGameBoard.innerHTML = board;
         };
-        local.gameBoardDraw(local.gameState);
+        local.testRun = function (event) {
+            switch (event && event.currentTarget.id) {
+            case 'gameBoard1':
+                // perform player move
+                if (event.target.dataset.positionCol) {
+                    local.playerMove(local.gameState, Number(event.target.dataset.positionCol));
+                    local.gameDraw(local.gameState);
+                }
+                break;
+            // reset game
+            case 'resetButton1':
+                local.gameState = local.gameStateCreate();
+                local.gameDraw(local.gameState);
+                break;
+            }
+        };
+        // init event-handling
+        ['click'].forEach(function (event) {
+            Array.prototype.slice.call(
+                document.querySelectorAll('.on' + event)
+            ).forEach(function (element) {
+                element.addEventListener(event, local.testRun);
+            });
+        });
+        // reset game
+        document.querySelector('#resetButton1').click();
         break;
 
 
@@ -297,11 +339,17 @@
 <meta charset="UTF-8">\n\
 <title>connect4</title>\n\
 <style>\n\
+#gameBoard1 thead button:hover {\n\
+    cursor: pointer;\n\
+}\n\
+#gameBoard1 thead {\n\
+    margin-bottom: 10px;\n\
+}\n\
 #gameBoard1 table {\n\
     background-color: #77f;\n\
-    border: 1px solid black;\n\
 }\n\
 .playerDisc {\n\
+    background-color: #fff;\n\
     border: 1px solid black;\n\
     border-radius: 20px;\n\
     height: 20px;\n\
@@ -309,17 +357,21 @@
     width: 20px;\n\
 }\n\
 .playerDisc1 {\n\
-    background-color: #f00;\n\
+    background-color: #ff0;\n\
 }\n\
 .playerDisc2 {\n\
-    background-color: #ff0;\n\
+    background-color: #f00;\n\
 }\n\
 </style>\n\
 </head>\n\
 <body>\n\
 <h1>connect 4 game</h1>\n\
-<button>reset game</button>\n\
-<div id="gameBoard1"></div>\n\
+<button class="onclick" id="resetButton1">reset game</button><br>\n\
+<br>\n\
+<h2 id="gameStatus1"></h2>\n\
+<div id="gameContainer1">\n\
+    <div class="onclick" id="gameBoard1"></div>\n\
+</div>\n\
 <script src="assets.index.js"></script>\n\
 </body>\n\
             ');
